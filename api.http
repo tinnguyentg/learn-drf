@@ -1,0 +1,25 @@
+GET http://127.0.0.1:8000/users/ HTTP/1.1
+Authorization: Basic admin@gmail.com:123
+
+### 
+
+# Staff create user
+POST http://127.0.0.1:8000/users/ HTTP/1.1
+Authorization: Basic admin@gmail.com:123
+Content-Type: application/json
+
+{
+    "email": "user@gmail.com",
+    "password": "123"
+}
+
+
+###
+
+# Request missing authentication header
+GET http://127.0.0.1:8000/users/ HTTP/1.1
+
+
+### qwe
+
+GET http://127.0.0.1:8000/users/ HTTP/1.1
