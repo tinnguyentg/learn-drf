@@ -1,7 +1,6 @@
 from django.contrib.auth import password_validation, authenticate
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
-from rest_framework.authtoken.models import Token
 
 from .models import CustomUser
 
@@ -23,7 +22,6 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255, required=True)
     password = serializers.CharField(max_length=128, write_only=True)
-    token = serializers.CharField(read_only=True)
 
     def validate(self, attrs):
         email = attrs.get("email")
@@ -40,9 +38,14 @@ class UserLoginSerializer(serializers.Serializer):
             msg = _('Must include "username" and "password".')
             raise serializers.ValidationError(msg, code="authorization")
 
-        token, created = Token.objects.get_or_create(user=user)
-        attrs["token"] = token
+        attrs["user"] = user
         return attrs
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ("id", "email", "is_active", "is_staff", "is_superuser", "auth_token")
 
 
 class UserPasswordChangeSerializer(serializers.Serializer):
