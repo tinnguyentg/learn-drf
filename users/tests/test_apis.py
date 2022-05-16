@@ -86,3 +86,22 @@ class TestPasswordChangeView(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password(data["new"]))
+
+
+class TestTokenObtainPairView(APITestCase):
+    def setUp(self) -> None:
+        self.url = reverse("users:api:token_obtain_pair")
+        self.refresh_url = reverse("users:api:token_refresh")
+        self.user = UserFactory()
+        self.credentials = {"email": self.user.email, "password": UserFactory.password}
+
+    def test_obtain_refresh(self):
+        response = self.client.post(self.url, data=self.credentials)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", response.data)
+        self.assertIn("refresh", response.data)
+
+        response = self.client.post(
+            self.refresh_url, data={"refresh": response.data["refresh"]}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
