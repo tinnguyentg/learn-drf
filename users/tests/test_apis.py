@@ -30,3 +30,21 @@ class TestSignUpView(APITestCase):
         response = self.client.post(self.url, data=self.data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("password", response.data)
+
+class TestLoginView(APITestCase):
+    def setUp(self) -> None:
+        self.url = reverse("users:api:login")
+        self.user = UserFactory()
+        self.credentials = {
+            "email": self.user.email,
+            "password": UserFactory.password
+        }
+
+    def test_login(self):
+        response = self.client.post(self.url, data=self.credentials)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_login_fail(self):
+        credentials = factory.build(dict, FACTORY_CLASS=UserFactory)
+        response = self.client.post(self.url, data=credentials)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
