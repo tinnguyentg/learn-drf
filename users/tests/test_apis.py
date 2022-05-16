@@ -8,11 +8,11 @@ from .factories import UserFactory
 
 UserModel = get_user_model()
 
-class TestSignUpView(APITestCase):
 
+class TestSignUpView(APITestCase):
     def setUp(self):
         self.url = reverse("users:api:signup")
-        self.data = factory.build(dict, FACTORY_CLASS=UserFactory) 
+        self.data = factory.build(dict, FACTORY_CLASS=UserFactory)
 
     def test_signup(self):
         response = self.client.post(self.url, data=self.data)
@@ -31,14 +31,12 @@ class TestSignUpView(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("password", response.data)
 
+
 class TestLoginView(APITestCase):
     def setUp(self) -> None:
         self.url = reverse("users:api:login")
         self.user = UserFactory()
-        self.credentials = {
-            "email": self.user.email,
-            "password": UserFactory.password
-        }
+        self.credentials = {"email": self.user.email, "password": UserFactory.password}
 
     def test_login(self):
         response = self.client.post(self.url, data=self.credentials)
@@ -48,3 +46,18 @@ class TestLoginView(APITestCase):
         credentials = factory.build(dict, FACTORY_CLASS=UserFactory)
         response = self.client.post(self.url, data=credentials)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class TestPasswordChangeView(APITestCase):
+    def setUp(self) -> None:
+        self.url = reverse("users:api:password_change")
+        self.user = UserFactory()
+        self.credentials = {"email": self.user.email, "password": UserFactory.password}
+
+    def test_password_change(self):
+        data = {"current": UserFactory.password, "new": "zxc,nm,#@12"}
+        self.client.login(**self.credentials)
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(data["new"]))
