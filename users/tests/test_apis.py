@@ -78,3 +78,11 @@ class TestPasswordChangeView(APITestCase):
         self.client.login(**self.credentials)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_password_change_using_token_authentication(self):
+        data = {"current": UserFactory.password, "new": "zxc,nm,#@12"}
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.user.auth_token.key)
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(data["new"]))
