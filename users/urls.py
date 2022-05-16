@@ -1,7 +1,7 @@
-from django.urls import path
+from django.urls import include, path
 
 from . import views
 
-urlpatterns = [
-    path("signup/", views.SignupView.as_view()),
-]
+
+app_name = "users"
+urlpatterns = [path("api/", include("users.urls_api", namespace="api"))]
