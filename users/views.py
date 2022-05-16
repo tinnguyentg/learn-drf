@@ -1,13 +1,8 @@
-from rest_framework import generics, permissions, authentication
+from rest_framework import generics, permissions
 
-from .serializers import UserSerializer
-from .models import CustomUser
+from .serializers import UserSignUpSerializer
 
 
-class UserListCreateView(generics.ListCreateAPIView):
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAdminUser]
-    authentication_classes = [authentication.BasicAuthentication]
-
-    def get_queryset(self):
-        return CustomUser.objects.all().order_by("email")
+class SignupView(generics.CreateAPIView):
+    serializer_class = UserSignUpSerializer
+    permission_classes = [permissions.AllowAny]
