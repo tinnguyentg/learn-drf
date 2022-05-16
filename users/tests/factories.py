@@ -11,8 +11,14 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = CustomUser
 
     email = factory.lazy_attribute(lambda _: fake.unique.email())
-    password = factory.lazy_attribute(lambda _: fake.password())
+    password = "dsakj#@*ASHD"
 
+    @factory.post_generation
+    def set_password(obj, create, extracted, **kwargs):
+        if not create:
+            return
+        obj.set_password(obj.password)
+        obj.save()
 
 class AdminFactory(UserFactory):
     is_verified = True
