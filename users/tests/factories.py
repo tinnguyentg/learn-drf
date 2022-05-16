@@ -11,6 +11,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = CustomUser
 
     email = factory.lazy_attribute(lambda _: fake.unique.email())
+    password = factory.lazy_attribute(lambda _: fake.password())
 
 
 class AdminFactory(UserFactory):
