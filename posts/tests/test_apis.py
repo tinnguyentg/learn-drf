@@ -60,3 +60,20 @@ class TestTagViewSetWithAuthToken(TestTagViewSet):
 class TestTagViewSetWithJWTToken(TestTagViewSet):
     def auth(self):
         auth.jwt_auth(self.client, self.user)
+
+
+class TestPostViewSet(APITestCase):
+    def setUp(self) -> None:
+        self.data = factory.build(dict, FACTORY_CLASS=PostFactory)
+        self.user = UserFactory()
+        del self.data["author"]
+        self.urls = {"list": reverse("posts:posts-list")}
+        self.auth()
+
+    def auth(self):
+        auth.session_auth(self.client, self.user)
+
+    def test_create_post(self):
+        response = self.client.post(self.urls["list"], self.data)
+        print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)

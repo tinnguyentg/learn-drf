@@ -1,7 +1,7 @@
 from rest_framework import mixins, permissions, viewsets
 
 from .models import Tag
-from .serializers import TagListCreateSerializer, TagRetrieveSerializer
+from .serializers import PostSerializer, TagListCreateSerializer, TagRetrieveSerializer
 
 
 class TagViewSet(
@@ -20,3 +20,8 @@ class TagViewSet(
         if self.action in ["retrieve"]:
             return TagRetrieveSerializer
         return TagListCreateSerializer
+
+
+class PostViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    serializer_class = PostSerializer
+    permission_classes = (permissions.IsAuthenticated,)
