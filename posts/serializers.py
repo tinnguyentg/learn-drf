@@ -12,6 +12,7 @@ class TagListCreateSerializer(serializers.ModelSerializer):
 
 class PostSerializer(serializers.ModelSerializer):
     tags = TagListCreateSerializer(many=True, read_only=True)
+    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Post

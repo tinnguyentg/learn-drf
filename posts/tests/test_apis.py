@@ -4,7 +4,7 @@ from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.test import APITestCase
-from posts.models import Tag
+from posts.models import Tag, Post
 
 from users.tests.factories import UserFactory
 
@@ -75,5 +75,7 @@ class TestPostViewSet(APITestCase):
 
     def test_create_post(self):
         response = self.client.post(self.urls["list"], self.data)
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Post.objects.count(), 1)
+        post = Post.objects.get()
+        self.assertEqual(post.title, response.data["title"])
