@@ -22,7 +22,7 @@ class Post(models.Model):
     title = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=255)
     content = models.TextField()
-    tags = models.ManyToManyField(Tag, related_name="posts")
+    tags = models.ManyToManyField(Tag, related_name="posts", blank=True)
     author = models.ForeignKey(UserModel, on_delete=models.CASCADE)
 
     def save(self, **kwargs):
