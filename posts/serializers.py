@@ -16,7 +16,7 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ("title", "slug", "content", "author", "tags")
-        extra_kwargs = {"content": {"write_only": True}}
+        extra_kwargs = {"content": {"write_only": True}, "slug": {"read_only": True}}
 
 
 class TagRetrieveSerializer(serializers.ModelSerializer):
