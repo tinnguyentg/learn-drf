@@ -79,3 +79,14 @@ class TestPostViewSet(APITestCase):
         self.assertEqual(Post.objects.count(), 1)
         post = Post.objects.get()
         self.assertEqual(post.title, response.data["title"])
+
+    def test_create_post_with_tags(self):
+        tags_data = factory.build_batch(dict, FACTORY_CLASS=TagFactory, size=3)
+        data = self.data.copy()
+        data["tags"] = tags_data
+        response = self.client.post(self.urls["list"], data=data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Post.objects.count(), 1)
+        post = Post.objects.get()
+        self.assertEqual(post.title, response.data["title"])
+        self.assertEqual(post.tags.count(), len(tags_data))
