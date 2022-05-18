@@ -2,21 +2,18 @@ from random import choice
 import factory
 from django.urls import reverse
 
-from rest_framework import status
 from rest_framework.test import APITestCase
-from posts.models import Tag, Post
+from posts.models import Post
 
 from users.tests.factories import UserFactory
 
 from .factories import TagFactory, PostFactory
-from users.tests import auth
+from learndrf.tests.base import BaseAPITestCase
 
 
-class TestTagViewSet(APITestCase):
+class TestTagViewSet(APITestCase, BaseAPITestCase):
     def setUp(self):
-        self.tags = TagFactory.create_batch(10)
-        PostFactory.create_batch(2, tags=self.tags)
-        self.new_tag_data = factory.build(dict, FACTORY_CLASS=TagFactory)
+        self.data = factory.build(dict, FACTORY_CLASS=TagFactory)
         self.urls = {
             "list": reverse("posts:tags-list"),
             "detail": lambda slug: reverse("posts:tags-detail", args=(slug,)),
@@ -25,67 +22,73 @@ class TestTagViewSet(APITestCase):
         self.auth()
 
     def auth(self):
-        auth.session_auth(self.client, self.user)
+        self.session(self.user)
 
     def test_get_list(self):
+        tags = TagFactory.create_batch(10)
         response = self.client.get(self.urls["list"])
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(self.tags), len(response.data))
+        self.assertSuccess(response)
+        self.assertEqual(len(tags), len(response.data))
 
     def test_create_tag_fail(self):
         self.client.logout()
         self.client.credentials()
-        response = self.client.post(self.urls["list"], data=self.new_tag_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = self.client.post(self.urls["list"], data=self.data)
+        self.assertForbidden(response)
 
     def test_create_tag(self):
-        response = self.client.post(self.urls["list"], data=self.new_tag_data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.post(self.urls["list"], data=self.data)
+        self.assertCreated(response)
+
+    def test_creat_duplicate(self):
+        tag = TagFactory()
+        self.data["name"] = tag.name
+        response = self.client.post(self.urls["list"], self.data)
+        self.assertBadRequest(response)
 
     def test_detail_tag(self):
-        tag = choice(self.tags)
+        tag = TagFactory()
+        PostFactory.create_batch(2, tags=[tag])
         url = self.urls["detail"](tag.slug)
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["name"], tag.name)
-        self.assertEqual(response.data["slug"], tag.slug)
-        self.assertIn("posts", response.data)
+        self.assertSuccess(response)
+        self.assertKeysInReponseData(response, ["name", "slug", "posts"])
 
 
 class TestTagViewSetWithAuthToken(TestTagViewSet):
     def auth(self):
-        auth.token_auth(self.client, self.user)
+        self.token(self.user)
 
 
 class TestTagViewSetWithJWTToken(TestTagViewSet):
     def auth(self):
-        auth.jwt_auth(self.client, self.user)
+        self.jwt(self.user)
 
 
-class TestPostViewSet(APITestCase):
+class TestPostViewSet(APITestCase, BaseAPITestCase):
     def setUp(self) -> None:
-        self.data = factory.build(dict, FACTORY_CLASS=PostFactory)
-        self.user = UserFactory()
-        del self.data["author"]
         self.urls = {"list": reverse("posts:posts-list")}
+        self.user = UserFactory()
         self.auth()
 
+        self.data = factory.build(dict, FACTORY_CLASS=PostFactory)
+        del self.data["author"]
+
     def auth(self):
-        auth.session_auth(self.client, self.user)
+        self.session(self.user)
 
     def test_create_post(self):
         response = self.client.post(self.urls["list"], self.data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertCreated(response)
         self.assertEqual(Post.objects.count(), 1)
         post = Post.objects.get()
         self.assertEqual(post.title, response.data["title"])
 
     def test_create_post_with_tags(self):
         tags_data = factory.build_batch(dict, FACTORY_CLASS=TagFactory, size=3)
-        data = self.data.copy()
-        data["tags"] = tags_data
-        response = self.client.post(self.urls["list"], data=data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.data["tags"] = tags_data
+        response = self.client.post(self.urls["list"], data=self.data)
+        self.assertCreated(response)
         self.assertEqual(Post.objects.count(), 1)
         post = Post.objects.get()
         self.assertEqual(post.title, response.data["title"])
