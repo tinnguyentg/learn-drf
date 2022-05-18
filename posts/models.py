@@ -8,7 +8,7 @@ UserModel = get_user_model()
 
 class Tag(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=120)
+    slug = models.SlugField(max_length=120, editable=False)
 
     def save(self, **kwargs):
         self.slug = slugify(self.name)
@@ -20,7 +20,7 @@ class Tag(models.Model):
 
 class Post(models.Model):
     title = models.CharField(max_length=200, unique=True)
-    slug = models.SlugField(max_length=255)
+    slug = models.SlugField(max_length=255, editable=False)
     content = models.TextField()
     tags = models.ManyToManyField(Tag, related_name="posts", blank=True)
     author = models.ForeignKey(UserModel, on_delete=models.CASCADE)

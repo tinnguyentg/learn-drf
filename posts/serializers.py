@@ -7,14 +7,13 @@ class TagListCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ("slug", "name")
-        extra_kwargs = {"slug": {"read_only": True}}
 
 
 class TagListCreateWithNoValidatorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ("slug", "name")
-        extra_kwargs = {"slug": {"read_only": True}, "name": {"validators": []}}
+        extra_kwargs = {"name": {"validators": []}}
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -24,7 +23,6 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ["title", "slug", "content", "author", "tags"]
-        extra_kwargs = {"slug": {"read_only": True}}
 
     def create(self, validated_data):
         tags_data = validated_data.pop("tags", [])
@@ -67,4 +65,3 @@ class TagRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ("slug", "name", "posts")
-        extra_kwargs = {"slug": {"read_only": True}}
