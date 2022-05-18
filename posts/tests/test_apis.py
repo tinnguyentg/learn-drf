@@ -27,6 +27,7 @@ class TestTagViewSet(APITestCase, BaseAPITestCase):
 
     def test_get_list(self):
         tags = TagFactory.create_batch(10)
+        PostFactory(tags=tags)
         response = self.client.get(self.urls["list"])
         self.assertSuccess(response)
         self.assertEqual(len(tags), len(response.data))
