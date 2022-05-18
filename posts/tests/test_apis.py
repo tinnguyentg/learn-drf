@@ -156,3 +156,13 @@ class TestPostViewSet(APITestCase, BaseAPITestCase):
         response = self.client.patch(url, data)
         self.assertSuccess(response)
         self.assertEqual(response.data["title"], data["title"])
+
+    def test_delete_post(self):
+        tags = TagFactory.create_batch(3)
+        post = PostFactory(tags=tags)
+        self.user = post.author
+        self.auth()
+        url = self.urls["detail"](post.slug)
+        self.client.delete(url)
+        self.assertEqual(Post.objects.count(), 0)
+        self.assertEqual(Tag.objects.count(), 3)
