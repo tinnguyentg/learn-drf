@@ -1,4 +1,6 @@
-from rest_framework import mixins, permissions, viewsets
+from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, permissions, viewsets
 
 from posts.permissions import IsAuthorOrReadOnly
 
@@ -19,9 +21,13 @@ class TagViewSet(
 ):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     lookup_field = "slug"
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
+    search_fields = ["name", "posts__title"]
+    # ordering_fields = ['name']
+    filterset_fields = ["name"]
 
     def get_queryset(self):
-        return Tag.objects.all().order_by("name")
+        return Tag.objects.filter(~Q(posts=None)).order_by("name")
 
     def get_serializer_class(self):
         if self.action in ["retrieve"]:
