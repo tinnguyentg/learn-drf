@@ -68,7 +68,10 @@ class TestTagViewSetWithJWTToken(TestTagViewSet):
 
 class TestPostViewSet(APITestCase, BaseAPITestCase):
     def setUp(self) -> None:
-        self.urls = {"list": reverse("posts:posts-list")}
+        self.urls = {
+            "list": reverse("posts:posts-list"),
+            "detail": lambda slug: reverse("posts:posts-detail", args=(slug,)),
+        }
         self.user = UserFactory()
         self.auth()
 
@@ -101,3 +104,10 @@ class TestPostViewSet(APITestCase, BaseAPITestCase):
         self.data["tags"] = tags_data.data
         response = self.client.post(self.urls["list"], self.data)
         self.assertCreated(response)
+
+    def test_retrieve_post(self):
+        tags = TagFactory.create_batch(3)
+        post = PostFactory(tags=tags)
+        url = self.urls["detail"](post.slug)
+        response = self.client.get(url)
+        self.assertSuccess(response)
