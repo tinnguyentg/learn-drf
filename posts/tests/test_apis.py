@@ -3,7 +3,7 @@ import factory
 from django.urls import reverse
 
 from rest_framework.test import APITestCase
-from posts.models import Post
+from posts.models import Post, Tag
 from posts.serializers import TagListCreateSerializer
 
 from users.tests.factories import UserFactory
@@ -111,3 +111,40 @@ class TestPostViewSet(APITestCase, BaseAPITestCase):
         url = self.urls["detail"](post.slug)
         response = self.client.get(url)
         self.assertSuccess(response)
+
+    def test_update_post(self):
+        post = PostFactory()
+        url = self.urls["detail"](post.slug)
+        title = post.title
+        response = self.client.put(url, self.data)
+        self.assertSuccess(response)
+        post.refresh_from_db()
+        self.assertNotEqual(title, post.title)
+
+    def test_update_post_tags(self):
+        tags = TagFactory.create_batch(3)
+        post = PostFactory(tags=tags)
+        url = self.urls["detail"](post.slug)
+        new_tags = factory.build_batch(dict, 3, FACTORY_CLASS=TagFactory)
+        self.data["tags"] = new_tags
+        response = self.client.put(url, self.data)
+        self.assertSuccess(response)
+        self.assertEqual(Tag.objects.count(), 6)
+
+    def test_remove_post_tags(self):
+        tags = TagFactory.create_batch(3)
+        post = PostFactory(tags=tags)
+        url = self.urls["detail"](post.slug)
+        self.data["tags"] = []
+        response = self.client.put(url, self.data)
+        self.assertSuccess(response)
+        self.assertEqual(response.data["tags"], [])
+
+    def test_update_post_with_patch(self):
+        tags = TagFactory.create_batch(3)
+        post = PostFactory(tags=tags)
+        url = self.urls["detail"](post.slug)
+        data = {"title": "123"}
+        response = self.client.patch(url, data)
+        self.assertSuccess(response)
+        self.assertEqual(response.data["title"], data["title"])
