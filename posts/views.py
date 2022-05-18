@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, permissions, viewsets
+from rest_framework import filters, mixins, pagination, permissions, viewsets
 
 from posts.permissions import IsAuthorOrReadOnly
 
@@ -37,6 +37,7 @@ class TagViewSet(
 
 class PostViewSet(
     mixins.CreateModelMixin,
+    mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
@@ -46,6 +47,9 @@ class PostViewSet(
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly)
     lookup_field = "slug"
     queryset = Post.objects.all()
+    pagination_class = pagination.LimitOffsetPagination
+    page_size = 10
+    max_page_size = 50
 
     def get_serializer_class(self):
         if self.action in ["retrieve"]:
