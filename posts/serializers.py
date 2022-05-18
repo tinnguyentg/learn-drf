@@ -10,8 +10,15 @@ class TagListCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {"slug": {"read_only": True}}
 
 
+class TagListCreateWithNoValidatorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ("slug", "name")
+        extra_kwargs = {"slug": {"read_only": True}, "name": {"validators": []}}
+
+
 class PostSerializer(serializers.ModelSerializer):
-    tags = TagListCreateSerializer(many=True, required=False)
+    tags = TagListCreateWithNoValidatorSerializer(many=True, required=False)
     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:

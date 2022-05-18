@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 from posts.models import Post
+from posts.serializers import TagListCreateSerializer
 
 from users.tests.factories import UserFactory
 
@@ -93,3 +94,10 @@ class TestPostViewSet(APITestCase, BaseAPITestCase):
         post = Post.objects.get()
         self.assertEqual(post.title, response.data["title"])
         self.assertEqual(post.tags.count(), len(tags_data))
+
+    def test_create_post_with_duplicate_tags(self):
+        tags = TagFactory.create_batch(2)
+        tags_data = TagListCreateSerializer(tags, many=True)
+        self.data["tags"] = tags_data.data
+        response = self.client.post(self.urls["list"], self.data)
+        self.assertCreated(response)
