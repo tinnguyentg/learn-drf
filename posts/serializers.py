@@ -24,12 +24,25 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ["title", "slug", "content", "author", "tags"]
-        extra_kwargs = {"content": {"write_only": True}, "slug": {"read_only": True}}
+        extra_kwargs = {"slug": {"read_only": True}}
 
     def create(self, validated_data):
         tags_data = validated_data.pop("tags", [])
         tags = []
         post = Post.objects.create(**validated_data)
+
+        for tag_data in tags_data:
+            tag, _ = Tag.objects.get_or_create(**tag_data)
+            tags.append(tag)
+
+        post.tags.add(*tags)
+        return post
+
+    def update(self, instance, validated_data):
+        tags_data = validated_data.pop("tags", [])
+        tags = []
+        post = super().update(instance, validated_data)
+        post.tags.clear()
 
         for tag_data in tags_data:
             tag, _ = Tag.objects.get_or_create(**tag_data)
