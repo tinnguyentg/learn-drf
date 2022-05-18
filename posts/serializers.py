@@ -11,7 +11,7 @@ class TagListCreateSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    tags = TagListCreateSerializer(many=True)
+    tags = TagListCreateSerializer(many=True, required=False)
     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
@@ -20,7 +20,7 @@ class PostSerializer(serializers.ModelSerializer):
         extra_kwargs = {"content": {"write_only": True}, "slug": {"read_only": True}}
 
     def create(self, validated_data):
-        tags_data = validated_data.pop("tags")
+        tags_data = validated_data.pop("tags", [])
         tags = []
         post = Post.objects.create(**validated_data)
 
