@@ -82,6 +82,19 @@ class TestPostViewSet(APITestCase, BaseAPITestCase):
     def auth(self):
         self.session(self.user)
 
+    def test_get_list(self):
+        posts = PostFactory.create_batch(10)
+        response = self.client.get(self.urls["list"])
+        self.assertSuccess(response)
+        self.assertEqual(len(response.data), len(posts))
+
+    def test_get_list_with_pagination(self):
+        PostFactory.create_batch(10)
+        url = self.urls["list"] + "?limit=3&offset=2"
+        response = self.client.get(url)
+        self.assertSuccess(response)
+        self.assertKeysInReponseData(response, ["count", "next", "previous", "results"])
+
     def test_create_post(self):
         response = self.client.post(self.urls["list"], self.data)
         self.assertCreated(response)
