@@ -39,6 +39,15 @@ class PostSerializer(serializers.ModelSerializer):
         return post
 
 
+class PostReadSerializer(serializers.ModelSerializer):
+    tags = TagListCreateWithNoValidatorSerializer(many=True, read_only=True)
+    author = serializers.CharField(source="author.id")
+
+    class Meta:
+        model = Post
+        fields = ["title", "slug", "content", "author", "tags"]
+
+
 class TagRetrieveSerializer(serializers.ModelSerializer):
     posts = PostSerializer(many=True, read_only=True)
 
