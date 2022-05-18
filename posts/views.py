@@ -1,5 +1,7 @@
 from rest_framework import mixins, permissions, viewsets
 
+from posts.permissions import IsAuthorOrReadOnly
+
 from .models import Post, Tag
 from .serializers import (
     PostReadSerializer,
@@ -34,7 +36,7 @@ class PostViewSet(
     viewsets.GenericViewSet,
 ):
     serializer_class = PostSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly)
     lookup_field = "slug"
     queryset = Post.objects.all()
 
