@@ -166,3 +166,13 @@ class TestPostViewSet(APITestCase, BaseAPITestCase):
         self.client.delete(url)
         self.assertEqual(Post.objects.count(), 0)
         self.assertEqual(Tag.objects.count(), 3)
+
+
+class TestPostViewSetWithAuthToken(TestPostViewSet):
+    def auth(self):
+        self.token(self.user)
+
+
+class TestPostViewSetWithJWTToken(TestPostViewSet):
+    def auth(self):
+        self.jwt(self.user)
