@@ -114,6 +114,8 @@ class TestPostViewSet(APITestCase, BaseAPITestCase):
 
     def test_update_post(self):
         post = PostFactory()
+        self.user = post.author
+        self.auth()
         url = self.urls["detail"](post.slug)
         title = post.title
         response = self.client.put(url, self.data)
@@ -124,6 +126,8 @@ class TestPostViewSet(APITestCase, BaseAPITestCase):
     def test_update_post_tags(self):
         tags = TagFactory.create_batch(3)
         post = PostFactory(tags=tags)
+        self.user = post.author
+        self.auth()
         url = self.urls["detail"](post.slug)
         new_tags = factory.build_batch(dict, 3, FACTORY_CLASS=TagFactory)
         self.data["tags"] = new_tags
@@ -134,6 +138,8 @@ class TestPostViewSet(APITestCase, BaseAPITestCase):
     def test_remove_post_tags(self):
         tags = TagFactory.create_batch(3)
         post = PostFactory(tags=tags)
+        self.user = post.author
+        self.auth()
         url = self.urls["detail"](post.slug)
         self.data["tags"] = []
         response = self.client.put(url, self.data)
@@ -143,6 +149,8 @@ class TestPostViewSet(APITestCase, BaseAPITestCase):
     def test_update_post_with_patch(self):
         tags = TagFactory.create_batch(3)
         post = PostFactory(tags=tags)
+        self.user = post.author
+        self.auth()
         url = self.urls["detail"](post.slug)
         data = {"title": "123"}
         response = self.client.patch(url, data)
